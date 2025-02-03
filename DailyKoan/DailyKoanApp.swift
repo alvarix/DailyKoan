@@ -1,14 +1,9 @@
-//
-//  DailyKoanApp.swift
-//  DailyKoan
-//
-//  Created by Alvar Sirlin on 2/3/25.
-//
-
 import SwiftUI
 
 @main
 struct DailyKoanApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate // Handle notifications
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
