@@ -3,6 +3,14 @@ import UserNotifications
 class NotificationManager {
     static let shared = NotificationManager()
 
+
+    func saveNotificationTime(_ date: Date) {
+        let components = Calendar.current.dateComponents([.hour, .minute], from: date)
+        UserDefaults.standard.set(components.hour, forKey: "notificationHour")
+        UserDefaults.standard.set(components.minute, forKey: "notificationMinute")
+        scheduleDailyNotification() // Reschedule with new time
+    }
+
     func scheduleDailyNotification() {
         let center = UNUserNotificationCenter.current()
 
@@ -16,8 +24,8 @@ class NotificationManager {
         content.sound = .default
 
         var dateComponents = DateComponents()
-        dateComponents.hour = 7
-        dateComponents.minute = 0
+        dateComponents.hour = UserDefaults.standard.integer(forKey: "notificationHour")
+        dateComponents.minute = UserDefaults.standard.integer(forKey: "notificationMinute")
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
         let request = UNNotificationRequest(identifier: "dailyKoan", content: content, trigger: trigger)

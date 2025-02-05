@@ -4,6 +4,7 @@ struct ContentView: View {
     @State private var notificationsEnabled = false
     @State private var dailyKoan: String?
     @State private var showNotificationAlert = false
+    @State private var selectedTime = Date()
     
     var body: some View {
         VStack {
@@ -34,6 +35,12 @@ struct ContentView: View {
                     message: Text("To receive your daily koan notification, enable notifications in Settings."),
                     dismissButton: .default(Text("OK"))
                 )
+            }
+            
+            DatePicker("Notification Time", selection: $selectedTime, displayedComponents: .hourAndMinute)
+                .padding()
+            Button("Save Time & Enable Notifications") {
+                saveNotificationTime(selectedTime)
             }
         }
         .onAppear {
