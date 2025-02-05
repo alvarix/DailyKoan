@@ -3,7 +3,8 @@ import SwiftUI
 struct ContentView: View {
     @State private var notificationsEnabled = false
     @State private var dailyKoan: String?
-
+    @State private var showNotificationAlert = false
+    
     var body: some View {
         VStack {
             Text("Daily Koan")
@@ -26,6 +27,14 @@ struct ContentView: View {
                 }
                 .padding()
             }
+
+            .alert(isPresented: $showNotificationAlert) {
+                Alert(
+                    title: Text("Notifications Disabled"),
+                    message: Text("To receive your daily koan notification, enable notifications in Settings."),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
         }
         .onAppear {
             checkNotificationStatus()
@@ -37,20 +46,20 @@ struct ContentView: View {
         dailyKoan = KoanManager.shared.getDailyKoan()
     }
 
-    private func requestNotificationPermission() {
-        let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
-            DispatchQueue.main.async {
-                if granted {
-                    notificationsEnabled = true
-                    NotificationManager.shared.scheduleDailyNotification()
-                    print("✅ Notifications enabled and scheduled")
-                } else {
-                    print("❌ Notifications denied")
-                }
+private func requestNotificationPermission() {
+    let center = UNUserNotificationCenter.current()
+    center.requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+        DispatchQueue.main.async {
+            if granted {
+                notificationsEnabled = true
+                NotificationManager.shared.scheduleDailyNotification()
+            } else {
+                notificationsEnabled = false
+                showNotificationAlert = true
             }
         }
     }
+}
 
     private func checkNotificationStatus() {
         let center = UNUserNotificationCenter.current()
