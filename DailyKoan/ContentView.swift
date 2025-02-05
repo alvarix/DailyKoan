@@ -4,7 +4,12 @@ struct ContentView: View {
     @State private var notificationsEnabled = false
     @State private var dailyKoan: String?
     @State private var showNotificationAlert = false
-    @State private var selectedTime = Date()
+    @State private var selectedTime: Date = {
+        var components = DateComponents()
+        components.hour = 7
+        components.minute = 0
+        return Calendar.current.date(from: components) ?? Date()
+    }()
     
     var body: some View {
         VStack {
