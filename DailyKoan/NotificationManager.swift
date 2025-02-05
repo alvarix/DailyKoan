@@ -11,11 +11,12 @@ class NotificationManager {
 
         let content = UNMutableNotificationContent()
         content.title = "Daily Koan"
-        content.body = getRandomKoanForNotifications() // Use koans from Koans.swift
+        content.body = KoanManager.shared.getDailyKoan()
+        
         content.sound = .default
 
         var dateComponents = DateComponents()
-        dateComponents.hour = 9
+        dateComponents.hour = 7
         dateComponents.minute = 0
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
@@ -25,7 +26,7 @@ class NotificationManager {
             if let error = error {
                 print("❌ Failed to schedule notification: \(error)")
             } else {
-                print("✅ Daily notification scheduled at 9 AM")
+                print("✅ Daily notification scheduled at 7 AM")
             }
         }
     }

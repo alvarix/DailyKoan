@@ -21,7 +21,7 @@ struct ContentView: View {
             }
 
             if !notificationsEnabled {
-                Button("Enable Notification at 9AM") {
+                Button("Enable Notification at 7AM") {
                     requestNotificationPermission()
                 }
                 .padding()
@@ -34,7 +34,7 @@ struct ContentView: View {
     }
 
     private func loadDailyKoan() {
-        dailyKoan = NotificationManager.shared.getRandomKoanForMainScreen()
+        dailyKoan = KoanManager.shared.getDailyKoan()
     }
 
     private func requestNotificationPermission() {
