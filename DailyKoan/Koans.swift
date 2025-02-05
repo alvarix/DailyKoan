@@ -1,13 +1,10 @@
 import Foundation
-let koans = [
-    "Two monks were arguing about the temple flag waving in the wind.One said, The flag moves. The other said, The wind moves.  They argued back and forth but could not agree. Hui-neng, the sixth patriarch, said: Gentlemen! It is not the flag that moves. It is not the wind that moves. It is your mind that moves. The two monks were struck with awe.",
-    "If you meet the Buddha on the road, kill him.",
-    "A monk asked Kegon, How does an enlightened one return to the ordinary world?            Kegon replied, A broken mirror never reflects again; fallen flowers never go back to the old branches.",
-    "Shuzan held out his short staff and said, If you call this a short staff, you oppose its reality. If you do not call it a short staff, you ignore the fact. Now what do you wish to call this?",
-    "When the many are reduced to one, to what is the one reduced?",
-    "A monk asked Master Haryo, What is the way? Haryo said, An open-eyed man falling into the well.",
-    "One day as Manjusri stood outside the gate, the Buddha called to him, Manjusri, Manjusri, why do you not enter?            Manjusri replied, I do not see myself as outside. Why enter?",
-    "After taking the high seat to preach to the assembly, Fa-yen raised his hand and pointed to the bamboo blinds. Two monks went over and rolled them up in the same way. Fa-yen said, One gains, one loses.",
-    "As the roof was leaking, a zen Master told two monks to bring something to catch the water. One brought a tub, the other a basket. The first was severely reprimanded, the second highly praised.",
-    "One day Chao-chou fell down in the snow, and called out, Help me up! Help me up! A monk came and lay down beside him. Chao-chou got up and went away."
-]
+
+let koans: [String] = {
+    if let url = Bundle.main.url(forResource: "koans", withExtension: "json"),
+       let data = try? Data(contentsOf: url),
+       let decoded = try? JSONDecoder().decode([String].self, from: data) {
+        return decoded
+    }
+    return ["Reflect on nothingness."] // Fallback koan
+}()
