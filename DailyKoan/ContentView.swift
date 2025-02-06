@@ -1,9 +1,8 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var notificationsEnabled = false
     @State private var dailyKoan: String?
-    @State private var showSettings = false  // ✅ Track settings screen state
+    @State private var showSettings = false  // ✅ Track settings screen visibility
 
     var body: some View {
         VStack {
@@ -14,6 +13,7 @@ struct ContentView: View {
             if let koan = dailyKoan {
                 Text(koan)
                     .font(.title2)
+                    .multilineTextAlignment(.center)
                     .padding()
             } else {
                 Text("Loading Koan...")
@@ -21,7 +21,7 @@ struct ContentView: View {
                     .padding()
             }
 
-            Spacer()
+            Spacer()  // ✅ Pushes the settings button to the bottom
 
             // ✅ Settings button at the bottom
             Button(action: {
@@ -38,6 +38,7 @@ struct ContentView: View {
         }
         .onAppear {
             loadDailyKoan()
+            SoundManager.shared.playSound(named: "bell")  // ✅ Play bell sound on open
         }
     }
 
