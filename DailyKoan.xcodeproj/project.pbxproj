@@ -15,6 +15,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				"repomix-output.txt",
 			);
 			target = B44B0B2B2D514574000C3D09 /* DailyKoan */;
 		};

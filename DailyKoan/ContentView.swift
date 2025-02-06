@@ -5,12 +5,15 @@ struct ContentView: View {
     @State private var dailyKoan: String?
     @State private var showNotificationAlert = false
     @State private var selectedTime: Date = {
+        // Default to 7 AM
         var components = DateComponents()
         components.hour = 7
         components.minute = 0
         return Calendar.current.date(from: components) ?? Date()
     }()
-    
+    @State private var showConfirmationAlert = false
+    @State private var showToast = false
+
     var body: some View {
         VStack {
             Text("Daily Koan")
@@ -21,6 +24,7 @@ struct ContentView: View {
                 Text(koan)
                     .font(.title2)
                     .padding()
+                    .multilineTextAlignment(.center)
             } else {
                 Text("Loading Koan...")
                     .font(.title2)
@@ -31,13 +35,25 @@ struct ContentView: View {
                 .padding()
 
             Button("Save Time & Enable Notifications") {
-                print("🛠 Button pressed - saving time")
                 NotificationManager.shared.saveNotificationTime(selectedTime)
+                showConfirmationAlert = true
+                showToast = true
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    showToast = false
+                }
             }
             .padding()
+            .alert(isPresented: $showConfirmationAlert) {
+                Alert(
+                    title: Text("Success"),
+                    message: Text("Notification time saved for \(formattedTime(selectedTime))"),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
 
             if !notificationsEnabled {
-                Button("Enable Notification at 7AM") {
+                Button("Enable Notification at 7 AM") {
                     requestNotificationPermission()
                 }
                 .padding()
@@ -46,15 +62,12 @@ struct ContentView: View {
         .onAppear {
             checkNotificationStatus()
             loadDailyKoan()
+            //resetStoredKoan()
         }
-
-        .alert(isPresented: $showNotificationAlert) {  // 🔥 FIX: Attach to VStack
-            Alert(
-                title: Text("Notifications Disabled"),
-                message: Text("To receive your daily koan notification, enable notifications in Settings."),
-                dismissButton: .default(Text("OK"))
-            )
-        }
+        .overlay(
+            showToast ? toastMessage() : nil,
+            alignment: .bottom
+        )
     }
 
     private func loadDailyKoan() {
@@ -70,7 +83,7 @@ struct ContentView: View {
                     NotificationManager.shared.scheduleDailyNotification()
                 } else {
                     notificationsEnabled = false
-                    showNotificationAlert = true // Show alert if denied
+                    showNotificationAlert = true
                 }
             }
         }
@@ -83,5 +96,21 @@ struct ContentView: View {
                 notificationsEnabled = (settings.authorizationStatus == .authorized)
             }
         }
+    }
+
+    private func formattedTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+
+    private func toastMessage() -> some View {
+        Text("✅ Notification time updated!")
+            .padding()
+            .background(Color.green.opacity(0.8))
+            .cornerRadius(10)
+            .foregroundColor(.white)
+            .transition(.opacity)
+            .padding(.bottom, 50)
     }
 }
