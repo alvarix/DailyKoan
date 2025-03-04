@@ -2,34 +2,49 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var dailyKoan: String?
-    @State private var showSettings = false  // Track settings screen visibility
-    @Environment(\.scenePhase) private var scenePhase  // Monitor app lifecycle changes
+    @State private var showSettings = false
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        ScrollView {  // Enables pull-to-refresh gesture
-            VStack {
-                Text("Daily Koan")
-                    .font(.largeTitle)
-                    .padding()
-                
-                if let koan = dailyKoan {
-                    Text(koan)
-                        .font(.title2)
-                        .multilineTextAlignment(.center)
-                        .padding()
-                } else {
-                    Text("Loading Koan...")
-                        .font(.title2)
-                        .padding()
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                // Main scrollable content with pull-to-refresh.
+                ScrollView {
+                    VStack {
+                        Text("Daily Koan")
+                            .font(.largeTitle)
+                            .padding(.top, 20)
+                        
+                        Text("swipe down to refresh")
+                            .font(.footnote)
+                            .italic()
+                        
+                        Spacer()
+                        
+                        if let koan = dailyKoan {
+                            Text(koan)
+                                .font(.title2)
+                                .multilineTextAlignment(.center)
+                                .padding()
+                        } else {
+                            Text("Loading Koan...")
+                                .font(.title2)
+                                .padding()
+                        }
+                        
+                        Spacer()
+                    }
+                    .frame(minHeight: geometry.size.height)
+                }
+                .refreshable {
+                    await refreshKoan()
                 }
                 
-                Spacer()  // Pushes the settings button to the bottom
-                
-                // Settings button at the bottom
+                // Gear icon button pinned at the bottom.
                 Button(action: {
                     showSettings = true
                 }) {
-                    Image(systemName: "gearshape")  // Settings icon
+                    Image(systemName: "gearshape")
                         .resizable()
                         .frame(width: 30, height: 30)
                         .padding()
@@ -38,33 +53,27 @@ struct ContentView: View {
                     SettingsView()
                 }
             }
-        }
-        .refreshable {
-            await refreshKoan()
-        }
-        .onAppear {
-            loadDailyKoan()
-            SoundManager.shared.playSound(named: "bell")  // Play bell sound on open
-        }
-        // When the app becomes active (e.g., after a notification tap), reload the koan
-        .onChange(of: scenePhase) { newPhase in
-            if newPhase == .active {
+            .onAppear {
                 loadDailyKoan()
+                SoundManager.shared.playSound(named: "bell")
+            }
+            .onChange(of: scenePhase) { newPhase in
+                if newPhase == .active {
+                    loadDailyKoan()
+                }
             }
         }
     }
     
     /**
-     Loads the stored daily koan using the KoanManager.
+     Loads the stored daily koan from KoanManager.
      */
     private func loadDailyKoan() {
         dailyKoan = KoanManager.shared.getDailyKoan()
     }
     
     /**
-     Refreshes the daily koan using a pull-to-refresh gesture.
-     
-     This method forces a new koan for the current day and updates the UI accordingly.
+     Refreshes the daily koan and updates the UI.
      */
     private func refreshKoan() async {
         let newKoan = KoanManager.shared.refreshDailyKoan()
