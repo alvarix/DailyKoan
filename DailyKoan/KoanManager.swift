@@ -18,7 +18,7 @@ class KoanManager {
         let calendar = Calendar.current
         let startOfToday = calendar.startOfDay(for: today)
         
-        // Format the date to a string ("yyyy-MM-dd") for localization purposes.
+        // Format the date to a string ("yyyy-MM-dd") for localization.
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         let todayString = dateFormatter.string(from: startOfToday)
@@ -35,6 +35,33 @@ class KoanManager {
         defaults.set(todayString, forKey: "dailyKoanDate")
         defaults.set(newKoan, forKey: "dailyKoan")
         print("🔄 New koan selected for \(todayString): \(newKoan)")
+        return newKoan
+    }
+    
+    /**
+     Refreshes the daily koan by selecting a new random koan for the current calendar day.
+     
+     This method overrides the previously stored koan for today, updates the value in UserDefaults,
+     and returns the new koan.
+     
+     - Returns: A new daily koan string.
+     */
+    func refreshDailyKoan() -> String {
+        let defaults = UserDefaults.standard
+        let today = Date()
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: today)
+        
+        // Format the date to a string ("yyyy-MM-dd")
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let todayString = dateFormatter.string(from: startOfToday)
+        
+        // Generate a new koan and store it.
+        let newKoan = koans.randomElement() ?? "⚠️ No koan found!"
+        defaults.set(todayString, forKey: "dailyKoanDate")
+        defaults.set(newKoan, forKey: "dailyKoan")
+        print("🔄 Daily koan refreshed for \(todayString): \(newKoan)")
         return newKoan
     }
 }
