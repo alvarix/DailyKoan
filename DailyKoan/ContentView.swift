@@ -7,20 +7,36 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        ZStack {
-            if isLoading {
-                LoadingScreen()
-            } else {
-                mainContent
+        NavigationView {
+            ZStack {
+                if isLoading {
+                    LoadingScreen()
+                } else {
+                    mainContent
+                }
             }
-        }
-        .onAppear {
-            loadDailyKoan()
-        }
-        .onChange(of: scenePhase) { newPhase in
-            if newPhase == .active {
+            .onAppear {
                 loadDailyKoan()
             }
+            .onChange(of: scenePhase) { newPhase in
+                if newPhase == .active {
+                    loadDailyKoan()
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .bottomBar) {
+                    Button(action: { showSettings = true }) {
+                        Image(systemName: "gearshape.fill")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                            .foregroundColor(.primary)
+                    }
+                }
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+            }
+            .toolbarBackground(.clear, for: .bottomBar) // Transparent bottom bar
         }
     }
 
@@ -29,50 +45,38 @@ struct ContentView: View {
      */
     private var mainContent: some View {
         GeometryReader { geometry in
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack {
-                        Text("Daily Koan")
-                            .font(.largeTitle)
-                            .padding(.top, 20)
+            let isIpad = UIDevice.current.userInterfaceIdiom == .pad
+            let maxWidth = isIpad ? geometry.size.width * 2 / 3 : geometry.size.width * 0.9
 
-                        Text("swipe down to refresh")
-                            .font(.footnote)
-                            .italic()
+            VStack {
+                Spacer()
 
-                        Spacer()
+                Text("Daily Koan")
+                    .font(isIpad ? .system(size: 48, weight: .bold) : .largeTitle)
+                    .padding(.top, 20)
 
-                        if let koan = dailyKoan {
-                            Text(koan)
-                                .font(.title2)
-                                .multilineTextAlignment(.center)
-                                .padding()
-                        } else {
-                            Text("No Koan Available")
-                                .font(.title2)
-                                .padding()
-                        }
+                Text("swipe down to refresh")
+                    .font(isIpad ? .title2.italic() : .footnote.italic())
+                    .padding(.bottom, 10)
 
-                        Spacer()
-                    }
-                    .frame(minHeight: geometry.size.height)
-                }
-                .refreshable {
-                    await refreshKoan()
-                }
-
-                Button(action: {
-                    showSettings = true
-                }) {
-                    Image(systemName: "gearshape")
-                        .resizable()
-                        .frame(width: 30, height: 30)
+                if let koan = dailyKoan {
+                    Text(koan)
+                        .font(isIpad ? .system(size: 32) : .title2)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: maxWidth)
+                        .padding()
+                } else {
+                    Text("No Koan Available")
+                        .font(isIpad ? .system(size: 32) : .title2)
                         .padding()
                 }
-                .sheet(isPresented: $showSettings) {
-                    SettingsView()
-                }
+
+                Spacer()
             }
+            .frame(maxWidth: maxWidth)
+            .frame(maxHeight: .infinity)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, isIpad ? 20 : 0)
         }
     }
 
