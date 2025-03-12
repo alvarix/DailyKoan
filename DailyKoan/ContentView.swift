@@ -2,36 +2,36 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var dailyKoan: String?
+    @State private var isLoading = false
     @State private var showSettings = false
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                // Main scrollable content with pull-to-refresh.
                 ScrollView {
                     VStack {
                         Text("Daily Koan")
                             .font(.largeTitle)
                             .padding(.top, 20)
-                        
+
                         Text("swipe down to refresh")
                             .font(.footnote)
                             .italic()
-                        
+
                         Spacer()
-                        
-                        if let koan = dailyKoan {
+
+                        if isLoading {
+                            ProgressView("Loading Koan...")
+                                .font(.title2)
+                                .padding()
+                        } else if let koan = dailyKoan {
                             Text(koan)
                                 .font(.title2)
                                 .multilineTextAlignment(.center)
                                 .padding()
-                        } else {
-                            Text("Loading Koan...")
-                                .font(.title2)
-                                .padding()
                         }
-                        
+
                         Spacer()
                     }
                     .frame(minHeight: geometry.size.height)
@@ -39,8 +39,7 @@ struct ContentView: View {
                 .refreshable {
                     await refreshKoan()
                 }
-                
-                // Gear icon button pinned at the bottom.
+
                 Button(action: {
                     showSettings = true
                 }) {
@@ -64,21 +63,27 @@ struct ContentView: View {
             }
         }
     }
-    
+
     /**
-     Loads the stored daily koan from KoanManager.
+     Loads the stored daily koan from KoanManager with a loading state.
      */
     private func loadDailyKoan() {
-        dailyKoan = KoanManager.shared.getDailyKoan()
+        isLoading = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            dailyKoan = KoanManager.shared.getDailyKoan()
+            isLoading = false
+        }
     }
-    
+
     /**
-     Refreshes the daily koan and updates the UI.
+     Refreshes the daily koan with a loading state.
      */
     private func refreshKoan() async {
+        isLoading = true
         let newKoan = KoanManager.shared.refreshDailyKoan()
         await MainActor.run {
             dailyKoan = newKoan
+            isLoading = false
         }
     }
 }
